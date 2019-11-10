@@ -3,8 +3,10 @@ package cn.wwq.controller;
 import cn.wwq.service.StuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
+@ApiIgnore
 public class StuTestController {
 
     @Autowired
