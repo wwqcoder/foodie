@@ -21,6 +21,26 @@
 
   </resultMap>
 
+    <resultMap id="myNewItemsVO" type="cn.wwq.pojo.vo.NewItemsVO">
+        <id column="rootCatId" property="rootCatId" />
+        <id column="rootCatName" property="rootCatName" />
+        <id column="slogan" property="slogan" />
+        <id column="catImage" property="catImage" />
+        <id column="bgColor" property="bgColor" />
+
+        <!--
+              collection:用于定义关联的list集合类型的封装规则
+              property：对应三级分类的list属性名
+              ofType：集合的类型，三级分类的vo 泛型
+        -->
+        <collection property="simpleItemList" ofType="cn.wwq.pojo.vo.SimpleItemVO">
+            <id column="itemId" property="itemId" />
+            <result column="itemName" property="itemName" />
+            <result column="itemUrl" property="itemUrl" />
+        </collection>
+
+    </resultMap>
+
   <select id="getSubCatList" resultMap="myCategoryVO" parameterType="int">
     select
         f.id id,
@@ -39,5 +59,38 @@
        f.id = c.father_id
        where f.father_id = #{rootCatId}
   </select>
+
+    <select id="getSixNewItemLazy" resultMap="myNewItemsVO" parameterType="Map">
+        select
+            f.id as rootCatId,
+            f.name as rootCatName,
+            f.slogan as slogan,
+            f.cat_image as catImage,
+            f.bg_color as bgColor,
+            i.id as itemId,
+            i.item_name as itemName,
+            ii.url as itemUrl,
+            i.created_time as createdTime
+        from
+            category f
+        left join
+            items i
+        on
+            f.id = i.root_cat_id
+        left join
+            items_img ii
+        on
+            i.id = ii.item_id
+        where
+            f.type = 1
+        and
+            i.root_cat_id = #{paramsMap.rootCatId}
+        and
+            ii.is_main = 1
+        order by
+            i.created_time
+        desc
+            limit 0,6
+    </select>
 
 </mapper>

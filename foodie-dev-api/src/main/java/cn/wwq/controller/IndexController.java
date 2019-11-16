@@ -4,6 +4,7 @@ import cn.wwq.enums.YesOrNo;
 import cn.wwq.pojo.Carousel;
 import cn.wwq.pojo.Category;
 import cn.wwq.pojo.vo.CategoryVO;
+import cn.wwq.pojo.vo.NewItemsVO;
 import cn.wwq.service.CarouselService;
 import cn.wwq.service.CategoryService;
 import cn.wwq.utils.IMOOCJSONResult;
@@ -66,5 +67,17 @@ public class IndexController {
         return IMOOCJSONResult.ok(list);
     }
 
+    @ApiOperation(value = "查询每个一级分类下的最新6条数据",notes = "查询每个一级分类下的最新6条数据",httpMethod = "GET")
+    @GetMapping("/sixNewItems/{rootCatId}")
+    public IMOOCJSONResult sixNewItems(
+            @ApiParam(name = "rootCatId",value = "一级分类ID",required = true)
+            @PathVariable Integer rootCatId){
 
+        if (null == rootCatId){
+            return IMOOCJSONResult.errorMsg("分类不存在");
+        }
+
+        List<NewItemsVO> list = categoryService.getSixNewItemLazy(rootCatId);
+        return IMOOCJSONResult.ok(list);
+    }
 }

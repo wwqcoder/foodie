@@ -3,6 +3,7 @@ package cn.wwq.service;
 import cn.wwq.pojo.Carousel;
 import cn.wwq.pojo.Category;
 import cn.wwq.pojo.vo.CategoryVO;
+import cn.wwq.pojo.vo.NewItemsVO;
 
 import java.util.List;
 
@@ -20,4 +21,11 @@ public interface CategoryService {
      * @return
      */
     public List<CategoryVO> getSubCatList(Integer rootCatId);
+
+    /**
+     * 查询首页每个一级分类下的6条最新商品数据
+     * @param rootCatId
+     * @return
+     */
+    public List<NewItemsVO> getSixNewItemLazy(Integer rootCatId);
 }
