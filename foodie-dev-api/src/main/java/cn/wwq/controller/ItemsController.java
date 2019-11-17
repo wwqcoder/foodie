@@ -2,10 +2,7 @@ package cn.wwq.controller;
 
 import cn.wwq.enums.YesOrNo;
 import cn.wwq.pojo.*;
-import cn.wwq.pojo.vo.CategoryVO;
-import cn.wwq.pojo.vo.CommentLevelCountVO;
-import cn.wwq.pojo.vo.ItemInfoVO;
-import cn.wwq.pojo.vo.NewItemsVO;
+import cn.wwq.pojo.vo.*;
 import cn.wwq.service.CarouselService;
 import cn.wwq.service.CategoryService;
 import cn.wwq.service.ItemService;
@@ -150,6 +147,20 @@ public class ItemsController extends BaseController {
                 page,pageSize);
 
         return IMOOCJSONResult.ok(grid);
+    }
+
+    //用于用户长时间未登陆网站，刷新购物车中的数据(主要是商品价格)
+    @ApiOperation(value = "根据商品规格IDs分页查询最新的商品数据",notes = "根据商品规格IDs分页查询最新的商品数据",httpMethod = "GET")
+    @GetMapping("/refresh")
+    public IMOOCJSONResult refresh(
+            @ApiParam(name = "itemSpecIds",value = "商品规格IDs",required = true,example = "1001,1002,1003")
+            @RequestParam String itemSpecIds){
+
+        if (itemSpecIds == null){
+            return IMOOCJSONResult.ok();
+        }
+        List<ShopcartVO> list = itemService.queryItemBySpecIds(itemSpecIds);
+        return IMOOCJSONResult.ok(list);
     }
 
 
