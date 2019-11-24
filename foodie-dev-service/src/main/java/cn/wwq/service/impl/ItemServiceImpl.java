@@ -9,6 +9,7 @@ import cn.wwq.pojo.vo.ItemCommentVO;
 import cn.wwq.pojo.vo.SearchItemsVO;
 import cn.wwq.pojo.vo.ShopcartVO;
 import cn.wwq.service.ItemService;
+import cn.wwq.service.impl.center.BaseService;
 import cn.wwq.utils.DesensitizationUtil;
 import cn.wwq.utils.PagedGridResult;
 import com.github.pagehelper.PageHelper;
@@ -25,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Service
-public class ItemServiceImpl implements ItemService {
+public class ItemServiceImpl extends BaseService implements ItemService {
 
     @Autowired
     private ItemsMapper itemsMapper;
@@ -169,17 +170,6 @@ public class ItemServiceImpl implements ItemService {
         }
         return itemsCommentsMapper.selectCount(condition);
     }
-
-    private PagedGridResult setterPagedGrid(List<?> list,Integer page){
-        PageInfo<?> pageList = new PageInfo<>(list);
-        PagedGridResult grid = new PagedGridResult();
-        grid.setPage(page);
-        grid.setRows(list);
-        grid.setTotal(pageList.getPages());
-        grid.setRecords(pageList.getTotal());
-        return grid;
-    }
-
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public String queryItemMainImgById(String itemId) {
