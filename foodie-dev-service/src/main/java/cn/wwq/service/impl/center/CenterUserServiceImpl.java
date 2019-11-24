@@ -26,7 +26,7 @@ public class CenterUserServiceImpl implements CenterUserService {
     @Transactional(propagation = Propagation.SUPPORTS)
     public Users queryUserInfo(String userId) {
         Users user = usersMapper.selectByPrimaryKey(userId);
-        user.setPassword("");
+        user.setPassword(null);
         return user;
     }
 
