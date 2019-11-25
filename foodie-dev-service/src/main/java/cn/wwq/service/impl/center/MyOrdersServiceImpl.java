@@ -8,6 +8,7 @@ import cn.wwq.mapper.OrdersMapperCustom;
 import cn.wwq.pojo.OrderStatus;
 import cn.wwq.pojo.Orders;
 import cn.wwq.pojo.vo.MyOrdersVO;
+import cn.wwq.pojo.vo.OrderStatusCountsVO;
 import cn.wwq.service.center.MyOrdersService;
 import cn.wwq.utils.PagedGridResult;
 import com.github.pagehelper.PageHelper;
@@ -120,5 +121,38 @@ public class MyOrdersServiceImpl implements MyOrdersService {
         return result == 1 ? true : false;
     }
 
+    @Override
+    @Transactional(propagation=Propagation.SUPPORTS)
+    public OrderStatusCountsVO getMyOrderStatusCounts(String userId) {
 
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("userId",userId);
+        map.put("orderStatus",OrderStatusEnum.WAIT_PAY.type);
+
+        Integer waitPayCounts = ordersMapperCustom.getMyOrderStatusCounts(map);
+
+        map.put("orderStatus",OrderStatusEnum.WAIT_DELIVER.type);
+        Integer waitDeliverCounts = ordersMapperCustom.getMyOrderStatusCounts(map);
+
+        map.put("orderStatus",OrderStatusEnum.WAIT_RECEIVE.type);
+        Integer waitReceiveCounts = ordersMapperCustom.getMyOrderStatusCounts(map);
+
+        map.put("orderStatus",OrderStatusEnum.SUCCESS.type);
+        map.put("isComment",YesOrNo.NO.type);
+        Integer waitCommentCounts = ordersMapperCustom.getMyOrderStatusCounts(map);
+
+        OrderStatusCountsVO countVO = new OrderStatusCountsVO(waitPayCounts
+        ,waitDeliverCounts,waitReceiveCounts,waitCommentCounts);
+        return countVO;
+    }
+
+    @Override
+    @Transactional(propagation=Propagation.SUPPORTS)
+    public PagedGridResult getMyOrderTrend(String userId, Integer page, Integer pageSize) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("userId",userId);
+        PageHelper.startPage(page,pageSize);
+        List<OrderStatus> list = ordersMapperCustom.getMyOrderTrend(map);
+        return setterPagedGrid(list,page);
+    }
 }

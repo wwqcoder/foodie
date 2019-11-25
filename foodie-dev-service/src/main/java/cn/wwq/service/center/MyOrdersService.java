@@ -3,6 +3,7 @@ package cn.wwq.service.center;
 import cn.wwq.pojo.Orders;
 import cn.wwq.pojo.Users;
 import cn.wwq.pojo.bo.center.CenterUserBO;
+import cn.wwq.pojo.vo.OrderStatusCountsVO;
 import cn.wwq.utils.PagedGridResult;
 
 public interface MyOrdersService {
@@ -46,4 +47,15 @@ public interface MyOrdersService {
      * @return
      */
     public boolean deleteOrder(String userId, String orderId);
+
+    /**
+     * 查询用户订单数
+     * @param userId
+     */
+    public OrderStatusCountsVO getMyOrderStatusCounts(String userId);
+
+
+    public PagedGridResult getMyOrderTrend(String userId,
+                                         Integer page,Integer pageSize);
+
 }

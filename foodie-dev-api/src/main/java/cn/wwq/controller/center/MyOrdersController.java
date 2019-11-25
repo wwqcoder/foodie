@@ -3,6 +3,7 @@ package cn.wwq.controller.center;
 import cn.wwq.controller.BaseController;
 import cn.wwq.pojo.Users;
 import cn.wwq.pojo.bo.center.CenterUserBO;
+import cn.wwq.pojo.vo.OrderStatusCountsVO;
 import cn.wwq.resource.FileUpload;
 import cn.wwq.service.center.CenterUserService;
 import cn.wwq.service.center.MyOrdersService;
@@ -38,6 +39,29 @@ public class MyOrdersController extends BaseController {
 
     @Autowired
     private MyOrdersService myOrdersService;
+
+    @ApiOperation(value = "查询订单动向",notes = "查询订单动向",httpMethod = "POST")
+    @PostMapping("/trend")
+    public IMOOCJSONResult trend(
+            @ApiParam(name = "userId",value = "用户ID",required = true)
+            @RequestParam String userId,
+            @ApiParam(name = "page",value = "查询下一页的第几页",required = false)
+            @RequestParam Integer page,
+            @ApiParam(name = "pageSize",value = "分页的每一页显示的条数",required = false)
+            @RequestParam Integer pageSize){
+
+        if (StringUtils.isBlank(userId)){
+            return IMOOCJSONResult.errorMsg(null);
+        }
+        if (page == null){
+            page = 1;
+        }
+        if (pageSize == null){
+            pageSize = SEARCH_PAGE_SIZE;
+        }
+        PagedGridResult grid = myOrdersService.getMyOrderTrend(userId, page, pageSize);
+        return IMOOCJSONResult.ok(grid);
+    }
 
     @ApiOperation(value = "查询订单列表",notes = "查询订单列表",httpMethod = "POST")
     @PostMapping("/query")
@@ -116,6 +140,21 @@ public class MyOrdersController extends BaseController {
         }
 
         return IMOOCJSONResult.ok();
+    }
+
+    @ApiOperation(value="获得订单状态数概况", notes="获得订单状态数概况", httpMethod = "POST")
+    @PostMapping("/statusCounts")
+    public IMOOCJSONResult statusCounts(
+            @ApiParam(name = "userId", value = "用户id", required = true)
+            @RequestParam String userId) {
+
+        if (StringUtils.isBlank(userId)){
+            return IMOOCJSONResult.errorMsg(null);
+        }
+
+        OrderStatusCountsVO countsVO = myOrdersService.getMyOrderStatusCounts(userId);
+
+        return IMOOCJSONResult.ok(countsVO);
     }
 
 
