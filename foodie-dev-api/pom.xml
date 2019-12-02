@@ -11,6 +11,8 @@
 
     <artifactId>foodie-dev-api</artifactId>
 
+    <packaging>war</packaging>
+
     <dependencies>
         <dependency>
             <groupId>cn.wwq</groupId>

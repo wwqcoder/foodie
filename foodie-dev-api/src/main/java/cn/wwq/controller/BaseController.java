@@ -26,7 +26,7 @@ public class BaseController {
 
     //微信支付成功  -》支付中心 -》 天天吃货平台
     //                         ｜ 回调通知的URL
-    String payReturnUrl = "http://jc73nw.natappfree.cc/orders/notifyMerchantOrderPaid";
+    String payReturnUrl = "http://180.76.235.76:8088/foodie-dev-api/orders/notifyMerchantOrderPaid";
     //用户上传头像的地址
     public static final String IMAGE_USER_FACE_LOCATION = File.separator+"Users"+File.separator+"wangweiqi"+File.separator+"IdeaProjects"+File.separator+"foodie-dev"+File.separator+"images";
 
