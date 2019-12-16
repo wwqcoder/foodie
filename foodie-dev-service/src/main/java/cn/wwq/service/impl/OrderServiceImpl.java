@@ -6,6 +6,7 @@ import cn.wwq.mapper.OrderItemsMapper;
 import cn.wwq.mapper.OrderStatusMapper;
 import cn.wwq.mapper.OrdersMapper;
 import cn.wwq.pojo.*;
+import cn.wwq.pojo.bo.ShopcartBO;
 import cn.wwq.pojo.bo.SubmitOrderBO;
 import cn.wwq.pojo.vo.MerchantOrdersVO;
 import cn.wwq.pojo.vo.OrderVO;
@@ -13,12 +14,14 @@ import cn.wwq.service.AddressService;
 import cn.wwq.service.ItemService;
 import cn.wwq.service.OrderService;
 import cn.wwq.utils.DateUtil;
+import cn.wwq.utils.RedisOperator;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,25 +30,22 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrdersMapper ordersMapper;
-
     @Autowired
     private Sid sid;
-
     @Autowired
     AddressService addressService;
-
     @Autowired
     ItemService itemService;
-
     @Autowired
     private OrderItemsMapper orderItemsMapper;
-
     @Autowired
     private OrderStatusMapper orderStatusMapper;
+    @Autowired
+    private RedisOperator redisOperator;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public OrderVO createOrder(SubmitOrderBO submitOrderBO) {
+    public OrderVO createOrder(List<ShopcartBO> shopcartList, SubmitOrderBO submitOrderBO) {
 
         String userId = submitOrderBO.getUserId();
         String addressId = submitOrderBO.getAddressId();
@@ -81,10 +81,13 @@ public class OrderServiceImpl implements OrderService {
         Integer totalAmount = 0;
         //优惠后的实付金额累计
         Integer realPayAmount = 0;
+        List<ShopcartBO> toBeRemovedShopcartLIst = new ArrayList<>();
         for (String itemSpecId : itemSpecIdArr) {
 
-            //TODO 整合redis后，商品购买的数量从redis的购物车中获取
-            int buyCounts = 1;
+            ShopcartBO cartItem = getBuyCountsFromShopcart(shopcartList, itemSpecId);
+            //整合redis后，商品购买的数量从redis的购物车中获取
+            int buyCounts = cartItem.getBuyCounts();
+            toBeRemovedShopcartLIst.add(cartItem);
 
             //2.1 根据规格ID，查询规格的具体信息，主要获取价格
             ItemsSpec itemsSpec = itemService.queryItemSpecBySpecId(itemSpecId);
@@ -133,7 +136,7 @@ public class OrderServiceImpl implements OrderService {
         OrderVO orderVO = new OrderVO();
         orderVO.setMerchantOrdersVO(merchantOrdersVO);
         orderVO.setOrderId(orderId);
-
+        orderVO.setToBeRemovedShopcartLIst(toBeRemovedShopcartLIst);
 
         return orderVO;
     }
@@ -181,7 +184,22 @@ public class OrderServiceImpl implements OrderService {
         close.setOrderStatus(OrderStatusEnum.CLOSE.type);
         close.setCloseTime(new Date());
         orderStatusMapper.updateByPrimaryKeySelective(close);
-
-
     }
+
+    /**
+     * 从redis中的购物车中获取商品，目的：counts
+     * @param shopcartList
+     * @param specId
+     * @return
+     */
+    private ShopcartBO getBuyCountsFromShopcart(List<ShopcartBO> shopcartList,String specId){
+        for (ShopcartBO sc : shopcartList) {
+            if (sc.getSpecId().equals(specId)){
+                return sc;
+            }
+        }
+        return null;
+    }
+
+
 }

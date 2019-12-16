@@ -8,9 +8,12 @@ import cn.wwq.pojo.vo.NewItemsVO;
 import cn.wwq.service.CarouselService;
 import cn.wwq.service.CategoryService;
 import cn.wwq.utils.IMOOCJSONResult;
+import cn.wwq.utils.JsonUtils;
+import cn.wwq.utils.RedisOperator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +36,31 @@ public class IndexController {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private RedisOperator redisOperator;
+
     @ApiOperation(value = "获取首页轮播图列表",notes = "获取首页轮播图列表",httpMethod = "GET")
     @GetMapping("/carousel")
     public IMOOCJSONResult carousel(){
-        List<Carousel> list = carouselService.queryAll(YesOrNo.YES.type);
+
+        String carouselStr = redisOperator.get("carousel");
+        List<Carousel> list = null;
+        if (StringUtils.isBlank(carouselStr)){
+            list = carouselService.queryAll(YesOrNo.YES.type);
+            redisOperator.set("carousel", JsonUtils.objectToJson(list));
+        }else {
+            list = JsonUtils.jsonToList(carouselStr, Carousel.class);
+        }
+
         return IMOOCJSONResult.ok(list);
     }
+
+    /**
+     * 1。广告图发生改变，删除缓存，然后重置
+     * 2。定时重置
+     * 3。每个轮播图有可能是一个广告，可能会过期，过期后在重置。
+     */
+
 
     /**
      * 首页分类展示需求
@@ -49,7 +71,15 @@ public class IndexController {
     @ApiOperation(value = "获取商品分类(一级分类)",notes = "获取商品分类(一级分类)",httpMethod = "GET")
     @GetMapping("/cats")
     public IMOOCJSONResult cats(){
-        List<Category> list = categoryService.queryAllRootLevelCat();
+
+        String categoryStr = redisOperator.get("category");
+        List<Category> list = null;
+        if (StringUtils.isBlank(categoryStr)){
+            list = categoryService.queryAllRootLevelCat();
+            redisOperator.set("category", JsonUtils.objectToJson(list));
+        }else {
+            list = JsonUtils.jsonToList(categoryStr, Category.class);
+        }
         return IMOOCJSONResult.ok(list);
     }
 
@@ -63,7 +93,14 @@ public class IndexController {
             return IMOOCJSONResult.errorMsg("分类不存在");
         }
 
-        List<CategoryVO> list = categoryService.getSubCatList(rootCatId);
+        String subCategoryStr = redisOperator.get("subCategory:"+rootCatId);
+        List<CategoryVO> list = null;
+        if (StringUtils.isBlank(subCategoryStr)){
+            list = categoryService.getSubCatList(rootCatId);
+            redisOperator.set("subCategory:"+rootCatId, JsonUtils.objectToJson(list));
+        }else {
+            list = JsonUtils.jsonToList(subCategoryStr, CategoryVO.class);
+        }
         return IMOOCJSONResult.ok(list);
     }
 

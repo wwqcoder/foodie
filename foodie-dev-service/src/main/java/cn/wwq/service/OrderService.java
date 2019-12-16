@@ -1,7 +1,7 @@
 package cn.wwq.service;
 
-import cn.wwq.pojo.Carousel;
 import cn.wwq.pojo.OrderStatus;
+import cn.wwq.pojo.bo.ShopcartBO;
 import cn.wwq.pojo.bo.SubmitOrderBO;
 import cn.wwq.pojo.vo.OrderVO;
 
@@ -10,10 +10,12 @@ import java.util.List;
 public interface OrderService {
     /**
      * 用于创建订单
+     *
+     * @param shopcartList
      * @param submitOrderBO
      * @return
      */
-    public OrderVO createOrder(SubmitOrderBO submitOrderBO);
+    public OrderVO createOrder(List<ShopcartBO> shopcartList, SubmitOrderBO submitOrderBO);
 
     /**
      * 修改订单状态
