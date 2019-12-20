@@ -39,6 +39,10 @@ public class IndexController {
     @Autowired
     private RedisOperator redisOperator;
 
+    /**
+     * 防止缓存穿透
+     * @return
+     */
     @ApiOperation(value = "获取首页轮播图列表",notes = "获取首页轮播图列表",httpMethod = "GET")
     @GetMapping("/carousel")
     public IMOOCJSONResult carousel(){
@@ -47,7 +51,10 @@ public class IndexController {
         List<Carousel> list = null;
         if (StringUtils.isBlank(carouselStr)){
             list = carouselService.queryAll(YesOrNo.YES.type);
-            redisOperator.set("carousel", JsonUtils.objectToJson(list));
+            if (null != list && list.size() > 0){
+                redisOperator.set("carousel", JsonUtils.objectToJson(list));
+            }
+            redisOperator.set("carousel", JsonUtils.objectToJson(list),5*60);
         }else {
             list = JsonUtils.jsonToList(carouselStr, Carousel.class);
         }
