@@ -8,14 +8,14 @@ spring:
   redis:
     database: 0
     #host: 172.16.13.130
-    #port: 6379
-    password: redis
+    host: 127.0.0.1
+    port: 6379
+    #password: redis
     #sentinel:   #哨兵模式
      # master: wwq-master
      # nodes: 172.16.13.130:26379,172.16.13.120:26379
     #cluster:    集群模式
     #  nodes: 172.16.13.130:6379,172.16.13.120:6379
-
 mybatis:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

@@ -3,6 +3,7 @@ package cn.wwq.controller.center;
 import cn.wwq.controller.BaseController;
 import cn.wwq.pojo.Users;
 import cn.wwq.pojo.bo.center.CenterUserBO;
+import cn.wwq.pojo.vo.UsersVO;
 import cn.wwq.resource.FileUpload;
 import cn.wwq.service.center.CenterUserService;
 import cn.wwq.utils.CookieUtils;
@@ -59,14 +60,12 @@ public class CenterUserController extends BaseController {
         }
         Users userResult = centerUserService.updateUserInfo(userId, centerUserBO);
 
-        userResult = setNullProperty(userResult);
-
+        //userResult = setNullProperty(userResult);
+        // 后续要改，增加令牌token，整合redis，分布式会话
+        UsersVO usersVO = convert(userResult);
         CookieUtils.setCookie(request,response,"user",
-                JsonUtils.objectToJson(userResult),true);
-
-        //TODO 后续要改，增加令牌token，整合redis，分布式会话
+                JsonUtils.objectToJson(usersVO),true);
         return IMOOCJSONResult.ok();
-
     }
 
     @ApiOperation(value = "修改用户头像",notes = "修改用户头像",httpMethod = "POST")
@@ -148,14 +147,12 @@ public class CenterUserController extends BaseController {
         //更新用户头像到数据库
         Users userResult = centerUserService.updateUserFace(userId, finalServerUrl);
 
-        userResult = setNullProperty(userResult);
-
+        //userResult = setNullProperty(userResult);
+        // 后续要改，增加令牌token，整合redis，分布式会话
+        UsersVO usersVO = convert(userResult);
         CookieUtils.setCookie(request,response,"user",
-                JsonUtils.objectToJson(userResult),true);
-
-        //TODO 后续要改，增加令牌token，整合redis，分布式会话
+                JsonUtils.objectToJson(usersVO),true);
         return IMOOCJSONResult.ok();
-
     }
 
     private Map<String,String> getError(BindingResult result){

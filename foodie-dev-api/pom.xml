@@ -11,7 +11,7 @@
 
     <artifactId>foodie-dev-api</artifactId>
 
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

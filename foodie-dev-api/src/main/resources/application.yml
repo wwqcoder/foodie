@@ -16,7 +16,7 @@ server:
 ############################################################
 spring:
   profiles:
-    active: prod
+    active: dev
   datasource:                                           # 数据源的相关配置
     type: com.zaxxer.hikari.HikariDataSource          # 数据源类型：HikariCP
     driver-class-name: com.mysql.jdbc.Driver          # mysql驱动
@@ -36,6 +36,8 @@ spring:
     multipart:
       max-file-size: 512000      #文件上传大小为500kb
       max-request-size: 512000   #请求大小限制为500kb
+  session:
+    store-type: redis
 
 ############################################################
 #
