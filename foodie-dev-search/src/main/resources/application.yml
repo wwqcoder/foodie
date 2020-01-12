@@ -1,0 +1,19 @@
+###################################################
+#
+# web访问端口号  约定：8088
+#
+############################################################
+server:
+  port: 8099
+
+spring:
+  datasource:                                           # 数据源的相关配置
+    type: com.zaxxer.hikari.HikariDataSource          # 数据源类型：HikariCP
+    driver-class-name: com.mysql.jdbc.Driver          # mysql驱动
+    url: jdbc:mysql://localhost:3306/foodie-shop-dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
+    username: root
+    password: 123456
+  data:
+    elasticsearch:
+      cluster-name: es6
+      cluster-nodes: 172.16.13.130:9300
