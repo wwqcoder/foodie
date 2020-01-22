@@ -36,7 +36,7 @@ public class UserTokenInterceptor implements HandlerInterceptor {
         String userToken = request.getHeader("headerUserToken");
 
         if (StringUtils.isNotBlank(userId) &&
-                StringUtils.isNotBlank(userId)
+                StringUtils.isNotBlank(userToken)
            ){
 
             String uniqueToken = redisOperator.get(REDIS_USER_TOKEN + ":" + userId);
