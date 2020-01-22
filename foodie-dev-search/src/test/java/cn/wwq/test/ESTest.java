@@ -1,6 +1,7 @@
 package cn.wwq.test;
 
 import cn.wwq.Application;
+import cn.wwq.pojo.Items;
 import cn.wwq.pojo.Stu;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -105,15 +106,15 @@ public class ESTest {
         Pageable  pageable = PageRequest.of(0, 10);
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.matchQuery("description", "bb man"))
+                .withQuery(QueryBuilders.matchQuery("itemName", "好吃"))
                 .withPageable(pageable)
                 .build();
 
-        AggregatedPage<Stu> stus = esTemplate.queryForPage(searchQuery, Stu.class);
+        AggregatedPage<Items> items = esTemplate.queryForPage(searchQuery, Items.class);
 
-        System.out.println("总分页数目"+stus.getTotalPages());
-        for (Stu stu : stus.getContent()) {
-            System.out.println(stu);
+        System.out.println("总分页数目"+items.getTotalPages());
+        for (Items item : items.getContent()) {
+            System.out.println(item);
         }
     }
 
