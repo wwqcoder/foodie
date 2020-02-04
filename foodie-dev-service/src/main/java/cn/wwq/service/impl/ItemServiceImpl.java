@@ -14,6 +14,8 @@ import cn.wwq.utils.DesensitizationUtil;
 import cn.wwq.utils.PagedGridResult;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,7 +26,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("ALL")
 @Service
 public class ItemServiceImpl extends BaseService implements ItemService {
 
@@ -42,6 +46,9 @@ public class ItemServiceImpl extends BaseService implements ItemService {
 
     @Autowired
     private ItemsMapperCustom itemsMapperCustom;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
 
 
@@ -181,6 +188,14 @@ public class ItemServiceImpl extends BaseService implements ItemService {
         return result != null ? result.getUrl() : "";
     }
 
+    /**
+     * 在扣减库存时，先获取分布式锁，
+     * 只有获得锁的请求才能扣减库存，没有获得锁的请求，
+     * 将等待。**这里我们需要注意的是获取锁时传入的key，
+     * 这里我们采用的是商品的规格ID，在并发时，规则ID相同时，才会产生等待。
+     * @param specId
+     * @param buyCounts
+     */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void decreaseItemSpecStock(String specId, Integer buyCounts) {
@@ -190,16 +205,33 @@ public class ItemServiceImpl extends BaseService implements ItemService {
         //分布式锁 zookeeper redis
 
         //lockutil.getLock()  --加锁
+        /**
+         *  分布式锁【3】 编写业务代码
+         *  1、Redisson是基于Redis，使用Redisson之前，项目必须使用Redis
+         *   2、注意getLock方法中的参数，以specId作为参数，每个specId一个key，和
+         *   数据库中的行锁是一致的，不会是方法级别的锁
+         */
 
-        //1.查询库存
+        RLock rLock = redissonClient.getLock("SPECID_" + specId);
 
-        //2。判断库存，是否能够减少到0一下
-
-        //lockutil.unLock()  --解锁
-
-        int result = itemsMapperCustom.decreaseItemSpecStock(buyCounts, specId);
-        if (result != 1){
-            throw new RuntimeException("订单创建失败，原因：库存不足");
+        try {
+            /**
+             * 1、获取分布式锁，锁的超时时间是5秒get
+             *  2、获取到了锁，进行后续的业务操作
+             */
+            rLock.lock(5, TimeUnit.HOURS);
+            int result = itemsMapperCustom.decreaseItemSpecStock(buyCounts, specId);
+            if (result != 1){
+                throw new RuntimeException("订单创建失败，原因：库存不足");
+            }
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        } finally {
+            /**
+             *  不管业务是否操作正确，随后都要释放掉分布式锁
+             *   如果不释放，过了超时时间也会自动释放
+             */
+            rLock.unlock();
         }
     }
 }
